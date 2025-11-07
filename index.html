@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FragezeichenArchiv - Audio Streaming</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load jsmediatags for reading MP3 metadata -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.8/jsmediatags.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom scrollbar for aesthetics */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4a5568; /* Gray-600 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: #1a202c; /* Gray-900 */
+        }
+        /* Sticky footer player */
+        #audio-player-container {
+            transition: transform 0.3s ease-in-out;
+        }
+        .hidden-player {
+            transform: translateY(100%);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#111827', /* Darker gray for background */
+                        'secondary-dark': '#1f2937', /* Even darker for cards */
+                        'accent': '#6366f1', /* Indigo-500 for accents */
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary-dark text-gray-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-secondary-dark shadow-lg py-4 px-6 sticky top-0 z-10 border-b border-gray-700">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold text-accent tracking-wider mb-2 sm:mb-0">FragezeichenArchiv</h1>
+            <!-- Search Bar -->
+            <div class="w-full sm:w-64">
+                <input type="text" id="search-input" onkeyup="filterFiles()" placeholder="Search files..."
+                       class="w-full p-2 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:ring-accent focus:border-accent transition duration-150">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-4xl mx-auto w-full p-4 pb-32">
+        <h2 class="text-xl font-semibold mb-4 text-gray-300">Hoerspiele Archive (/hoerspiele)</h2>
+        <!-- File List Container -->
+        <div id="file-list" class="space-y-3 custom-scrollbar overflow-y-auto max-h-[70vh]">
+            <!-- Files will be injected here by JavaScript -->
+        </div>
+        <!-- No results message -->
+        <p id="no-results" class="text-gray-500 text-center mt-8 hidden">
+            No audio files found matching your search. Try a different query.
+        </p>
+    </main>
+
+    <!-- Sticky Audio Player -->
+    <div id="audio-player-container" class="fixed bottom-0 left-0 right-0 bg-secondary-dark border-t-4 border-accent p-3 shadow-2xl hidden-player">
+        <div class="max-w-4xl mx-auto flex items-center space-x-3 sm:space-x-4">
+            <!-- Album Cover Area -->
+            <div id="player-cover-art" class="w-14 h-14 bg-gray-700 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
+                <!-- Default Icon -->
+                <svg class="w-8 h-8 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.007 1.93l-3.32 1.66A2.25 2.25 0 0112 18.25v-3.75a2.25 2.25 0 011.007-1.93l3.32-1.66A2.25 2.25 0 0119.5 12.25v-3.75" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12.75l-3.75 1.875a.75.75 0 01-1.125 0L6.375 12.75M15 12.75v-3.75a.75.75 0 01.75-.75h.375a.75.75 0 01.75.75v3.75M15 12.75v3.75a.75.75 0 01-.75.75h-.375a.75.75 0 01-.75-.75v-3.75" />
+                </svg>
+            </div>
+            <!-- Track Info -->
+            <div class="flex-grow min-w-0">
+                <p id="current-track-title" class="font-semibold truncate text-lg">No track selected</p>
+                <p id="current-track-path" class="text-gray-400 text-sm truncate">Click a file above to start listening.</p>
+            </div>
+            <!-- Audio Controls -->
+            <audio id="audio-player" controls class="w-full sm:w-auto" onloadedmetadata="playerVisible(true)">
+                <!-- Audio source will be set dynamically -->
+            </audio>
+        </div>
+    </div>
+
+    <script>
+        // Placeholder URLs for demonstration.
+        // In a real deployment, you would replace PLACEHOLDER_AUDIO_URL with your actual file paths.
+        const PLACEHOLDER_AUDIO_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+        const PLACEHOLDER_IMG_URL = "https://placehold.co/64x64/1f2937/6366f1?text=?";
+        const BASE_FOLDER = "/hoerspiele/";
+
+        // Default icon for the player when no track is selected
+        const PLAYER_DEFAULT_ICON = `
+            <svg class="w-8 h-8 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.007 1.93l-3.32 1.66A2.25 2.25 0 0112 18.25v-3.75a2.25 2.25 0 011.007-1.93l3.32-1.66A2.25 2.25 0 0119.5 12.25v-3.75" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12.75l-3.75 1.875a.75.75 0 01-1.125 0L6.375 12.75M15 12.75v-3.75a.75.75 0 01.75-.75h.375a.75.75 0 01.75.75v3.75M15 12.75v3.75a.75.75 0 01-.75.75h-.375a.75.75 0 01-.75-.75v-3.75" />
+            </svg>`;
+
+        // THIS IS THE LIST YOU NEED TO MAINTAIN.
+        // JavaScript cannot scan a folder, so you must list the filenames here.
+        const audioFileNames = [
+            "schattenmann.mp3",
+            "geisterschloss.mp3",
+            "singende_schlange.mp3",
+            "unheimliche_drache.mp3",
+            "nacht_in_angst.mp3",
+            "fluch_mumie.mp3",
+            "unsichtbare_gegner.mp3",
+            "dschungel_gefahr.mp3",
+            "panik_park.mp3",
+            "schatz_weg.mp3",
+            "phantom_raetsel.mp3",
+            "schrecken_tiefe.mp3"
+        ];
+        
+        // This array will be populated dynamically by reading the MP3 files.
+        let audioFileData = [];
+
+        const fileListContainer = document.getElementById('file-list');
+        const searchInput = document.getElementById('search-input');
+        const audioPlayer = document.getElementById('audio-player');
+        const playerContainer = document.getElementById('audio-player-container');
+        const currentTitle = document.getElementById('current-track-title');
+        const currentPath = document.getElementById('current-track-path');
+        const playerCoverArt = document.getElementById('player-cover-art');
+        const noResults = document.getElementById('no-results');
+
+        /**
+         * Fetches metadata for a single MP3 file.
+         * @param {string} filename The name of the file (e.g., "schattenmann.mp3")
+         * @returns {Promise<Object>} A promise that resolves with the file data object.
+         */
+        function fetchMetadata(filename) {
+            // In a real environment, the URL would be:
+            // const url = `${BASE_FOLDER}${filename}`;
+            // For this demo, we use the placeholder for all files:
+            const url = PLACEHOLDER_AUDIO_URL; 
+
+            return new Promise((resolve) => {
+                new window.jsmediatags.Reader(url)
+                    .read({
+                        onSuccess: (tag) => {
+                            const tags = tag.tags;
+                            let coverUrl = PLACEHOLDER_IMG_URL; // Default placeholder
+                            
+                            // If album art is found, convert it to a Base64 URL
+                            if (tags.picture) {
+                                const { data, format } = tags.picture;
+                                let base64String = "";
+                                for (let i = 0; i < data.length; i++) {
+                                    base64String += String.fromCharCode(data[i]);
+                                }
+                                coverUrl = `data:${format};base64,${window.btoa(base64String)}`;
+                            }
+
+                            resolve({
+                                title: tags.title || filename, // Fallback to filename if no title tag
+                                filename: filename,
+                                src: url, // The actual URL to play
+                                cover: coverUrl
+                            });
+                        },
+                        onError: (error) => {
+                            console.warn(`Failed to read metadata for ${filename}:`, error.type);
+                            // Resolve with basic info so the file still appears in the list
+                            resolve({
+                                title: filename,
+                                filename: filename,
+                                src: url,
+                                cover: PLACEHOLDER_IMG_URL
+                            });
+                        }
+                    });
+            });
+        }
+
+        /**
+         * Loads metadata for all files listed in `audioFileNames`.
+         */
+        async function loadAllMetadata() {
+            const filePromises = audioFileNames.map(filename => fetchMetadata(filename));
+            
+            try {
+                // Wait for all files to be processed
+                const files = await Promise.all(filePromises);
+                audioFileData = files.filter(file => file); // Filter out any potential nulls
+                
+                if (audioFileData.length > 0) {
+                    renderFiles(audioFileData);
+                } else {
+                    fileListContainer.innerHTML = `<p class="text-gray-500 text-center">No audio files found.</p>`;
+                }
+            } catch (error) {
+                console.error("Error loading metadata:", error);
+                fileListContainer.innerHTML = `<p class="text-red-500 text-center">Error loading archive. See console for details.</p>`;
+            }
+        }
+
+
+        /**
+         * Renders the list of audio files based on the filtered data.
+         * @param {Array<Object>} files The array of file objects to display.
+         */
+        function renderFiles(files) {
+            fileListContainer.innerHTML = ''; // Clear existing list
+            
+            if (files.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                files.forEach(file => {
+                    const fileElement = document.createElement('div');
+                    fileElement.className = 'file-item cursor-pointer p-3 bg-gray-800 hover:bg-gray-700 rounded-lg shadow-md transition duration-200 flex items-center space-x-4 border-l-4 border-transparent hover:border-accent';
+                    fileElement.onclick = () => playFile(file);
+
+                    // Updated template to include album cover
+                    fileElement.innerHTML = `
+                        <img src="${file.cover}" alt="Cover Art" class="w-12 h-12 rounded-md object-cover flex-shrink-0" onerror="this.src='${PLACEHOLDER_IMG_URL}'; this.onerror=null;">
+                        <div class="flex-grow min-w-0">
+                            <p class="text-base font-medium truncate">${file.title}</p>
+                            <p class="text-xs text-gray-400 truncate">${BASE_FOLDER}${file.filename}</p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent/80 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    `;
+                    fileListContainer.appendChild(fileElement);
+                });
+            }
+        }
+
+        /**
+         * Filters the file list based on the search input value.
+         */
+        function filterFiles() {
+            const searchTerm = searchInput.value.toLowerCase();
+            // Now search works on the dynamically loaded title *and* the filename
+            const filtered = audioFileData.filter(file =>
+                file.title.toLowerCase().includes(searchTerm) ||
+                file.filename.toLowerCase().includes(searchTerm)
+            );
+            renderFiles(filtered);
+        }
+
+        /**
+         * Loads and starts playback of a selected file.
+         * @param {Object} file The file object to play (which now has metadata).
+         */
+        function playFile(file) {
+            // Update track info
+            currentTitle.textContent = file.title;
+            currentPath.textContent = `${BASE_FOLDER}${file.filename}`;
+            
+            // Update player cover art
+            playerCoverArt.innerHTML = `<img src="${file.cover}" alt="${file.title}" class="w-full h-full object-cover" onerror="this.src='${PLACEHOLDER_IMG_URL}'; this.onerror=null;">`;
+
+            // Load and play audio
+            audioPlayer.src = file.src;
+            audioPlayer.load();
+            audioPlayer.play().catch(error => {
+                console.error("Autoplay failed:", error);
+                currentPath.textContent = "Playback ready. Click play on the player below to start.";
+            });
+
+            // Ensure the player is visible
+            playerVisible(true);
+        }
+
+        /**
+         * Controls the visibility of the sticky player.
+         * @param {boolean} isVisible Whether the player should be visible.
+         */
+        function playerVisible(isVisible) {
+            if (isVisible) {
+                playerContainer.classList.remove('hidden-player');
+                playerContainer.classList.add('translate-y-0');
+            } else {
+                playerContainer.classList.add('hidden-player');
+                playerContainer.classList.remove('translate-y-0');
+                // Reset player cover art to default when hiding
+                playerCoverArt.innerHTML = PLAYER_DEFAULT_ICON;
+            }
+        }
+
+        // Initialize the app on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            playerVisible(false); // Start with the player hidden
+            // Show a loading state
+            fileListContainer.innerHTML = `<p class="text-gray-400 text-center animate-pulse">Scanning archive...</p>`;
+            // Start loading all metadata
+            loadAllMetadata();
+        });
+    </script>
+</body>
+</html>

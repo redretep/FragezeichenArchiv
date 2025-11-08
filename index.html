@@ -134,7 +134,7 @@
 
         if (files.length > 0) playTrack(0);
       } catch {
-        loading.textContent = 'Error loading media';
+        loading.textContent = 'Fehler beim Laden des Hörspiels';
       } finally {
         loading.style.display = 'none';
       }
@@ -152,13 +152,13 @@
 
     function setSleepTimer() {
       const minutes = parseInt(document.getElementById('timerInput').value);
-      if (!minutes || minutes <= 0) return alert('Enter valid minutes!');
+      if (!minutes || minutes <= 0) return alert('Gib gültige Minuten ein!');
       clearTimeout(sleepTimer);
       clearInterval(countdownInterval);
       let remaining = minutes * 60;
       sleepTimer = setTimeout(() => {
         player.pause();
-        alert('Sleep timer ended. Playback stopped.');
+        alert('Sleeptimer beendet.');
         document.getElementById('timerCountdown').textContent = '';
       }, remaining * 1000);
 

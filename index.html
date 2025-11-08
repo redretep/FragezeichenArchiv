@@ -28,7 +28,19 @@
       position: relative;
       overflow: hidden;
     }
-    h2 { text-align: center; color: #1db954; margin-bottom: 10px; }
+    .tricolor {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 2em;
+  background: linear-gradient(
+    to right,
+    white 33.3%,
+    red 33.3%,
+    blue 33.3%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
     .search-bar { text-align: center; margin-bottom: 10px; }
     .search-bar input {
       width: 80%; padding: 10px; border-radius: 20px; border: none; outline: none;
@@ -75,7 +87,7 @@
       <div class="spinner"></div>
       Wird geladen...
     </div>
-    <h2>Das FragezeichenArchiv</h2>
+<h2 class="tricolor">FragezeichenArchiv</h2>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Suche nach Hörspielen..." oninput="filterTracks()">
     </div>

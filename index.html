@@ -3,43 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Archive.org Full Player with Sleep Timer</title>
+  <title>Archive Audio Player</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #121212, #181818);
+      background: linear-gradient(135deg, #0e0e0e, #1b1b1b);
       color: #fff;
       height: 100vh;
       width: 100vw;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
+      justify-content: space-between;
       overflow: hidden;
     }
     .player-box {
-      width: 90%;
-      height: 90%;
-      background: #1c1c1c;
-      border-radius: 25px;
-      padding: 30px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      flex: 1;
+      background: #181818;
+      border-radius: 0;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       position: relative;
       overflow: hidden;
     }
-    h2 { text-align: center; color: #1db954; margin-bottom: 20px; }
-    audio { width: 100%; margin-top: 15px; background: #000; border-radius: 10px; }
-    .track-list {
-      flex: 1; margin-top: 20px; overflow-y: auto; border-radius: 10px; background: #111; padding: 10px;
+    h2 { text-align: center; color: #1db954; margin-bottom: 10px; }
+    .search-bar { text-align: center; margin-bottom: 10px; }
+    .search-bar input {
+      width: 80%; padding: 10px; border-radius: 20px; border: none; outline: none;
+      background: #222; color: #fff; text-align: center; font-size: 16px; transition: 0.3s;
     }
-    .track { padding: 10px 15px; border-bottom: 1px solid #333; cursor: pointer; transition: all 0.3s ease; border-radius: 8px; }
+    .search-bar input:focus { background: #333; box-shadow: 0 0 10px #1db954; }
+    .track-list { flex: 1; overflow-y: auto; border-radius: 10px; background: #111; padding: 10px; }
+    .track {
+      display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-bottom: 1px solid #333;
+      cursor: pointer; transition: all 0.3s ease; border-radius: 8px;
+    }
+    .track img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
     .track:hover { background: #222; transform: scale(1.02); }
     .track.active { background: #333; color: #1db954; font-weight: 600; }
     .loading {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85);
       display: flex; justify-content: center; align-items: center; border-radius: 25px; font-size: 20px; font-weight: bold;
       z-index: 10; flex-direction: column;
     }
@@ -48,32 +53,20 @@
       animation: spin 1s linear infinite; margin-bottom: 10px;
     }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .sleep-timer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
+    .bottom-player {
+      width: 100%; background: #0f0f0f; padding: 10px; display: flex; align-items: center; justify-content: space-around;
+      border-top: 1px solid #222; position: sticky; bottom: 0;
     }
+    .bottom-player audio { flex: 1; margin: 0 10px; }
+    .sleep-timer { display: flex; align-items: center; gap: 8px; }
     .sleep-timer input {
-      width: 60px;
-      padding: 5px;
-      border-radius: 5px;
-      border: none;
-      text-align: center;
-      background: #222;
-      color: #fff;
+      width: 50px; padding: 5px; border-radius: 5px; border: none; background: #222; color: #fff; text-align: center;
     }
-    .sleep-timer button {
-      background: #1db954;
-      color: #fff;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
+    .sleep-timer button, .speed-btn {
+      background: #1db954; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
     }
-    .sleep-timer button:hover { background: #17a74a; }
+    .sleep-timer button:hover, .speed-btn:hover { background: #17a74a; }
+    #timerCountdown { font-size: 13px; color: #ccc; }
   </style>
 </head>
 <body>
@@ -82,14 +75,21 @@
       <div class="spinner"></div>
       Loading media...
     </div>
-    <h2>Die drei ??? Playlist</h2>
-    <div class="sleep-timer">
-      <label for="timerInput">Sleep (min):</label>
-      <input type="number" id="timerInput" min="1" max="120" placeholder="10">
-      <button onclick="setSleepTimer()">Start</button>
+    <h2>Audio Playlist</h2>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search tracks..." oninput="filterTracks()">
     </div>
     <div class="track-list" id="trackList"></div>
+  </div>
+
+  <div class="bottom-player">
     <audio id="audioPlayer" controls></audio>
+    <div class="sleep-timer">
+      <input type="number" id="timerInput" min="1" max="120" placeholder="10">
+      <button onclick="setSleepTimer()">Sleep</button>
+      <div id="timerCountdown"></div>
+    </div>
+    <button class="speed-btn" onclick="changeSpeed()">1x</button>
   </div>
 
   <script>
@@ -97,31 +97,38 @@
     const trackList = document.getElementById('trackList');
     const loading = document.getElementById('loading');
     const collection = 'die-drei-fragezeichen';
-    let sleepTimer;
+    let sleepTimer, countdownInterval, files = [], speed = 1;
 
     async function loadTracks() {
       try {
         const res = await fetch(`https://archive.org/metadata/${collection}`);
         const data = await res.json();
-        const files = data.files.filter(f => f.name.endsWith('.mp3'));
+        files = data.files.filter(f => f.name.endsWith('.mp3'));
 
-        files.forEach((file, index) => {
+        for (const [index, file] of files.entries()) {
           const item = document.createElement('div');
           item.classList.add('track');
-          item.textContent = file.name;
-          item.onclick = () => playTrack(index, files);
+          const cleanName = file.name.replace(/die[-_\s]*drei[-_\s]*fragezeichen/gi, '').replace(/\.mp3$/i, '').replace(/_/g, ' ').trim();
+          const nameElem = document.createElement('span');
+          nameElem.textContent = cleanName;
+          const coverImg = document.createElement('img');
+          const imgNumber = String(index + 1).padStart(3, '0');
+          coverImg.src = `${imgNumber}.png`;
+          item.appendChild(coverImg);
+          item.appendChild(nameElem);
+          item.onclick = () => playTrack(index, cleanName);
           trackList.appendChild(item);
-        });
+        }
 
-        if (files.length > 0) playTrack(0, files);
-      } catch (e) {
+        if (files.length > 0) playTrack(0);
+      } catch {
         loading.textContent = 'Error loading media';
       } finally {
         loading.style.display = 'none';
       }
     }
 
-    function playTrack(i, files) {
+    async function playTrack(i) {
       loading.style.display = 'flex';
       const url = `https://archive.org/download/${collection}/${files[i].name}`;
       player.src = url;
@@ -135,15 +142,38 @@
       const minutes = parseInt(document.getElementById('timerInput').value);
       if (!minutes || minutes <= 0) return alert('Enter valid minutes!');
       clearTimeout(sleepTimer);
+      clearInterval(countdownInterval);
+      let remaining = minutes * 60;
       sleepTimer = setTimeout(() => {
         player.pause();
         alert('Sleep timer ended. Playback stopped.');
-      }, minutes * 60000);
-      alert(`Sleep timer set for ${minutes} minute(s)`);
+        document.getElementById('timerCountdown').textContent = '';
+      }, remaining * 1000);
+
+      countdownInterval = setInterval(() => {
+        if (remaining > 0) {
+          remaining--;
+          const m = Math.floor(remaining / 60);
+          const s = remaining % 60;
+          document.getElementById('timerCountdown').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        } else clearInterval(countdownInterval);
+      }, 1000);
+    }
+
+    function changeSpeed() {
+      speed = speed === 2 ? 0.5 : speed + 0.5;
+      player.playbackRate = speed;
+      document.querySelector('.speed-btn').textContent = speed + 'x';
+    }
+
+    function filterTracks() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('.track').forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
+      });
     }
 
     loadTracks();
   </script>
 </body>
 </html>
-

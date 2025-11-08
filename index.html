@@ -73,11 +73,11 @@
   <div class="player-box">
     <div class="loading" id="loading">
       <div class="spinner"></div>
-      Loading media...
+      Wird geladen...
     </div>
-    <h2>Audio Playlist</h2>
+    <h2>Das FragezeichenArchiv</h2>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search tracks..." oninput="filterTracks()">
+      <input type="text" id="searchInput" placeholder="Suche nach Hörspielen..." oninput="filterTracks()">
     </div>
     <div class="track-list" id="trackList"></div>
   </div>
@@ -86,7 +86,7 @@
     <audio id="audioPlayer" controls></audio>
     <div class="sleep-timer">
       <input type="number" id="timerInput" min="1" max="120" placeholder="10">
-      <button onclick="setSleepTimer()">Sleep</button>
+      <button onclick="setSleepTimer()">Sleeptimer</button>
       <div id="timerCountdown"></div>
     </div>
     <button class="speed-btn" onclick="changeSpeed()">1x</button>

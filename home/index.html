@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,21 +29,21 @@
       overflow: hidden;
     }
     .tricolor {
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 2em;
-  background: linear-gradient(
-    to right,
-    white 33.3%,
-    red 33.3%,
-    red 66.6%
-    blue 66.6%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2em;
+      background: linear-gradient(
+        to right,
+        white 33.3%,
+        red 33.3%,
+        red 66.6%,
+        blue 66.6%
+      );
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
     .search-bar { text-align: center; margin-bottom: 10px; }
     .search-bar input {
       width: 80%; padding: 10px; border-radius: 20px; border: none; outline: none;
@@ -90,9 +90,9 @@
       <div class="spinner"></div>
       Wird geladen...
     </div>
-<h2 class="tricolor">FragezeichenArchiv</h2>
+    <h2 class="tricolor">FragezeichenArchiv</h2>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Suche nach HÃ¶rspielen..." oninput="filterTracks()">
+      <input type="text" id="searchInput" placeholder="Suche nach Hörspielen..." oninput="filterTracks()">
     </div>
     <div class="track-list" id="trackList"></div>
   </div>
@@ -113,6 +113,39 @@
     const loading = document.getElementById('loading');
     const collection = 'dreifragezeichen';
     let sleepTimer, countdownInterval, files = [], speed = 1;
+
+    const STATE_KEY = 'fragezeichenArchivState';
+
+    function loadState() {
+      const saved = localStorage.getItem(STATE_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse saved state:', e);
+        }
+      }
+      return {
+        trackIndex: null,
+        playbackPosition: 0,
+        playbackSpeed: 1
+      };
+    }
+
+    function saveState(updates) {
+      const currentState = loadState();
+      const newState = { ...currentState, ...updates };
+      localStorage.setItem(STATE_KEY, JSON.stringify(newState));
+    }
+
+    const savedState = loadState();
+    speed = savedState.playbackSpeed;
+
+    function setActiveTrack(index) {
+      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+      trackList.children[index].classList.add('active');
+      trackList.children[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     async function loadTracks() {
       try {
@@ -135,9 +168,19 @@
           trackList.appendChild(item);
         }
 
-        if (files.length > 0) playTrack(0);
+        if (files.length > 0 && savedState.trackIndex !== null) {
+          const trackIndex = savedState.trackIndex;
+          if (trackIndex < files.length) {
+            const url = `https://archive.org/download/${collection}/${files[trackIndex].name}`;
+            player.src = url;
+            player.addEventListener('loadedmetadata', () => {
+              player.currentTime = savedState.playbackPosition;
+            }, { once: true });
+            setActiveTrack(trackIndex);
+          }
+        }
       } catch {
-        loading.textContent = 'Fehler beim Laden des HÃ¶rspiels';
+        loading.textContent = 'Fehler beim Laden des Hörspiels';
       } finally {
         loading.style.display = 'none';
       }
@@ -148,14 +191,15 @@
       const url = `https://archive.org/download/${collection}/${files[i].name}`;
       player.src = url;
       player.play();
-      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
-      trackList.children[i].classList.add('active');
+      setActiveTrack(i);
       player.oncanplaythrough = () => { loading.style.display = 'none'; };
+
+      saveState({ trackIndex: i, playbackPosition: 0 });
     }
 
     function setSleepTimer() {
       const minutes = parseInt(document.getElementById('timerInput').value);
-      if (!minutes || minutes <= 0) return alert('Gib gÃ¼ltige Minuten ein!');
+      if (!minutes || minutes <= 0) return alert('Gib gültige Minuten ein!');
       clearTimeout(sleepTimer);
       clearInterval(countdownInterval);
       let remaining = minutes * 60;
@@ -179,6 +223,8 @@
       speed = speed === 2 ? 0.5 : speed + 0.5;
       player.playbackRate = speed;
       document.querySelector('.speed-btn').textContent = speed + 'x';
+
+      saveState({ playbackSpeed: speed });
     }
 
     function filterTracks() {
@@ -187,6 +233,27 @@
         item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
       });
     }
+
+    function savePlaybackPosition() {
+      saveState({ playbackPosition: player.currentTime });
+    }
+
+    player.onpause = savePlaybackPosition;
+    player.onseeked = savePlaybackPosition;
+
+    player.onended = () => {
+      saveState({ trackIndex: null, playbackPosition: 0 });
+      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+    };
+
+    window.addEventListener('beforeunload', () => {
+      if (!player.paused) {
+        savePlaybackPosition();
+      }
+    });
+
+    player.playbackRate = savedState.playbackSpeed;
+    document.querySelector('.speed-btn').textContent = savedState.playbackSpeed + 'x';
 
     loadTracks();
   </script>

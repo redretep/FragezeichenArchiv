@@ -114,7 +114,6 @@
     const collection = 'dreifragezeichen';
     let sleepTimer, countdownInterval, files = [], speed = 1;
 
-    // State management with localStorage
     const STATE_KEY = 'fragezeichenArchivState';
 
     function loadState() {
@@ -127,7 +126,7 @@
         }
       }
       return {
-        trackIndex: 0,
+        trackIndex: null,
         playbackPosition: 0,
         playbackSpeed: 1
       };
@@ -139,7 +138,6 @@
       localStorage.setItem(STATE_KEY, JSON.stringify(newState));
     }
 
-    // Load initial state
     const savedState = loadState();
     speed = savedState.playbackSpeed;
 
@@ -164,8 +162,7 @@
           trackList.appendChild(item);
         }
 
-        // Restore saved track without auto-playing
-        if (files.length > 0) {
+        if (files.length > 0 && savedState.trackIndex !== null) {
           const trackIndex = savedState.trackIndex;
           if (trackIndex < files.length) {
             const url = `https://archive.org/download/${collection}/${files[trackIndex].name}`;
@@ -191,7 +188,6 @@
       trackList.children[i].classList.add('active');
       player.oncanplaythrough = () => { loading.style.display = 'none'; };
 
-      // Save track index and reset position for new track
       saveState({ trackIndex: i, playbackPosition: 0 });
     }
 
@@ -222,7 +218,6 @@
       player.playbackRate = speed;
       document.querySelector('.speed-btn').textContent = speed + 'x';
 
-      // Save playback speed
       saveState({ playbackSpeed: speed });
     }
 
@@ -233,7 +228,6 @@
       });
     }
 
-    // Track playback position (throttled to save every 5 seconds)
     let lastSaveTime = 0;
     player.ontimeupdate = () => {
       const now = Date.now();
@@ -243,7 +237,11 @@
       }
     };
 
-    // Initialize player with saved state
+    player.onended = () => {
+      saveState({ trackIndex: null, playbackPosition: 0 });
+      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+    };
+
     player.playbackRate = savedState.playbackSpeed;
     document.querySelector('.speed-btn').textContent = savedState.playbackSpeed + 'x';
 

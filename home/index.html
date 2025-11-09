@@ -234,13 +234,12 @@
       });
     }
 
-    player.onpause = () => {
+    function savePlaybackPosition() {
       saveState({ playbackPosition: player.currentTime });
-    };
+    }
 
-    player.onseeked = () => {
-      saveState({ playbackPosition: player.currentTime });
-    };
+    player.onpause = savePlaybackPosition;
+    player.onseeked = savePlaybackPosition;
 
     player.onended = () => {
       saveState({ trackIndex: null, playbackPosition: 0 });
@@ -249,7 +248,7 @@
 
     window.addEventListener('beforeunload', () => {
       if (!player.paused) {
-        saveState({ playbackPosition: player.currentTime });
+        savePlaybackPosition();
       }
     });
 

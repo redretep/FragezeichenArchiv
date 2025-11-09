@@ -1,194 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FragezeichenArchiv</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0e0e0e, #1b1b1b);
-      color: #fff;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-    }
-    .player-box {
-      width: 100%;
-      flex: 1;
-      background: #181818;
-      border-radius: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-    }
-    .tricolor {
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 2em;
-  background: linear-gradient(
-    to right,
-    white 33.3%,
-    red 33.3%,
-    red 66.6%
-    blue 66.6%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-    .search-bar { text-align: center; margin-bottom: 10px; }
-    .search-bar input {
-      width: 80%; padding: 10px; border-radius: 20px; border: none; outline: none;
-      background: #222; color: #fff; text-align: center; font-size: 16px; transition: 0.3s;
-    }
-    .search-bar input:focus { background: #333; box-shadow: 0 0 10px #1db954; }
-    .track-list { flex: 1; overflow-y: auto; border-radius: 10px; background: #111; padding: 10px; }
-    .track {
-      display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-bottom: 1px solid #333;
-      cursor: pointer; transition: all 0.3s ease; border-radius: 8px;
-    }
-    .track img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
-    .track:hover { background: #222; transform: scale(1.02); }
-    .track.active { background: #333; color: #1db954; font-weight: 600; }
-    .loading {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85);
-      display: flex; justify-content: center; align-items: center; border-radius: 25px; font-size: 20px; font-weight: bold;
-      z-index: 10; flex-direction: column;
-    }
-    .spinner {
-      border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #1db954; border-radius: 50%; width: 40px; height: 40px;
-      animation: spin 1s linear infinite; margin-bottom: 10px;
-    }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .bottom-player {
-      width: 100%; background: #0f0f0f; padding: 10px; display: flex; align-items: center; justify-content: space-around;
-      border-top: 1px solid #222; position: sticky; bottom: 0;
-    }
-    .bottom-player audio { flex: 1; margin: 0 10px; }
-    .sleep-timer { display: flex; align-items: center; gap: 8px; }
-    .sleep-timer input {
-      width: 50px; padding: 5px; border-radius: 5px; border: none; background: #222; color: #fff; text-align: center;
-    }
-    .sleep-timer button, .speed-btn {
-      background: #1db954; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
-    }
-    .sleep-timer button:hover, .speed-btn:hover { background: #17a74a; }
-    #timerCountdown { font-size: 13px; color: #ccc; }
-  </style>
-</head>
-<body>
-  <div class="player-box">
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      Wird geladen...
-    </div>
-<h2 class="tricolor">FragezeichenArchiv</h2>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Suche nach Hörspielen..." oninput="filterTracks()">
-    </div>
-    <div class="track-list" id="trackList"></div>
-  </div>
-
-  <div class="bottom-player">
-    <audio id="audioPlayer" controls></audio>
-    <div class="sleep-timer">
-      <input type="number" id="timerInput" min="1" max="120" placeholder="10">
-      <button onclick="setSleepTimer()">Sleeptimer</button>
-      <div id="timerCountdown"></div>
-    </div>
-    <button class="speed-btn" onclick="changeSpeed()">1x</button>
-  </div>
-
-  <script>
-    const player = document.getElementById('audioPlayer');
-    const trackList = document.getElementById('trackList');
-    const loading = document.getElementById('loading');
-    const collection = 'dreifragezeichen';
-    let sleepTimer, countdownInterval, files = [], speed = 1;
-
-    async function loadTracks() {
-      try {
-        const res = await fetch(`https://archive.org/metadata/${collection}`);
-        const data = await res.json();
-        files = data.files.filter(f => f.name.endsWith('.mp3'));
-
-        for (const [index, file] of files.entries()) {
-          const item = document.createElement('div');
-          item.classList.add('track');
-          const cleanName = file.name.replace(/die[-_\s]*drei[-_\s]*fragezeichen/gi, '').replace(/\.mp3$/i, '').replace(/_/g, ' ').trim();
-          const nameElem = document.createElement('span');
-          nameElem.textContent = cleanName;
-          const coverImg = document.createElement('img');
-          const imgNumber = String(index + 1).padStart(3, '0');
-          coverImg.src = `${imgNumber}.png`;
-          item.appendChild(coverImg);
-          item.appendChild(nameElem);
-          item.onclick = () => playTrack(index, cleanName);
-          trackList.appendChild(item);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Das FragezeichenArchiv</title>
+    <!-- Import Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Set Inter as the default font */
+        body {
+            font-family: 'Inter', sans-serif;
         }
 
-        if (files.length > 0) playTrack(0);
-      } catch {
-        loading.textContent = 'Fehler beim Laden des Hörspiels';
-      } finally {
-        loading.style.display = 'none';
-      }
-    }
+        /* Define custom keyframe animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-    async function playTrack(i) {
-      loading.style.display = 'flex';
-      const url = `https://archive.org/download/${collection}/${files[i].name}`;
-      player.src = url;
-      player.play();
-      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
-      trackList.children[i].classList.add('active');
-      player.oncanplaythrough = () => { loading.style.display = 'none'; };
-    }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    function setSleepTimer() {
-      const minutes = parseInt(document.getElementById('timerInput').value);
-      if (!minutes || minutes <= 0) return alert('Gib gültige Minuten ein!');
-      clearTimeout(sleepTimer);
-      clearInterval(countdownInterval);
-      let remaining = minutes * 60;
-      sleepTimer = setTimeout(() => {
-        player.pause();
-        alert('Sleeptimer beendet.');
-        document.getElementById('timerCountdown').textContent = '';
-      }, remaining * 1000);
+        /* Apply animations */
+        /* We use classes to apply these animations */
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        .animate-slide-up-1 {
+            /* Start with opacity 0 to prevent flash */
+            opacity: 0; 
+            animation: slideUp 0.8s ease-out 0.4s forwards;
+        }
+        
+        .animate-slide-up-2 {
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.6s forwards;
+        }
+        
+        .animate-slide-up-3 {
+            opacity: 0;
+            animation: slideUp 0.8s ease-out 0.8s forwards;
+        }
+    </style>
+</head>
+<body class="bg-black">
 
-      countdownInterval = setInterval(() => {
-        if (remaining > 0) {
-          remaining--;
-          const m = Math.floor(remaining / 60);
-          const s = remaining % 60;
-          document.getElementById('timerCountdown').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-        } else clearInterval(countdownInterval);
-      }, 1000);
-    }
+    <main class="relative h-screen w-full overflow-hidden">
+        <!-- 1. Video Background -->
+        <!-- This video autoplays, loops, is muted, and plays inline (for mobile) -->
+        <!-- Poster image is a simple dark placeholder in case video fails -->
+        <video
+            class="absolute top-0 left-0 w-full h-full object-cover z-0"
+            src="bg.mp4"
+            autoplay
+            loop
+            muted
+            playsinline
+            poster="https://placehold.co/1920x1080/000000/000000?text=+"
+        ></video>
 
-    function changeSpeed() {
-      speed = speed === 2 ? 0.5 : speed + 0.5;
-      player.playbackRate = speed;
-      document.querySelector('.speed-btn').textContent = speed + 'x';
-    }
+        <!-- 2. Dark Overlay -->
+        <!-- This overlay ensures the text is readable on top of the video -->
+        <div class="absolute top-0 left-0 w-full h-full bg-black/70 z-10 animate-fade-in"></div>
 
-    function filterTracks() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      document.querySelectorAll('.track').forEach(item => {
-        item.style.display = item.textContent.toLowerCase().includes(query) ? 'flex' : 'none';
-      });
-    }
+        <!-- 3. Content -->
+        <div class="relative z-20 flex flex-col justify-center items-center h-full text-center text-white p-4">
+            
+            <!-- Logo/Title -->
+            <h1 class="text-7xl md:text-9xl font-black text-white animate-slide-up-1">
+                FragezeichenArchiv
+            </h1>
+            
+            <!-- Slogan (in German) -->
+            <p class="mt-4 text-xl md:text-3xl font-light text-green-300 animate-slide-up-2">
+                Das kostenlose und werbefreie Archiv der drei Detektive.
+            </p>
+            
+            <!-- Join Button (in German) -->
+            <a href="/home" class="mt-10 py-3 px-8 bg-green-500 text-black font-semibold rounded-full text-lg shadow-lg hover:bg-green-400 hover:scale-105 transition-all duration-300 ease-in-out animate-slide-up-3">
+                Jetzt hören!
+            </a>
+            
+        </div>
+    </main>
 
-    loadTracks();
-  </script>
 </body>
 </html>

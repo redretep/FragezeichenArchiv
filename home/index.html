@@ -29,21 +29,21 @@
       overflow: hidden;
     }
     .tricolor {
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 2em;
-  background: linear-gradient(
-    to right,
-    white 33.3%,
-    red 33.3%,
-    red 66.6%,
-    blue 66.6%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2em;
+      background: linear-gradient(
+        to right,
+        white 33.3%,
+        red 33.3%,
+        red 66.6%,
+        blue 66.6%
+      );
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
     .search-bar { text-align: center; margin-bottom: 10px; }
     .search-bar input {
       width: 80%; padding: 10px; border-radius: 20px; border: none; outline: none;
@@ -90,7 +90,7 @@
       <div class="spinner"></div>
       Wird geladen...
     </div>
-<h2 class="tricolor">FragezeichenArchiv</h2>
+    <h2 class="tricolor">FragezeichenArchiv</h2>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Suche nach Hörspielen..." oninput="filterTracks()">
     </div>
@@ -167,7 +167,9 @@
           if (trackIndex < files.length) {
             const url = `https://archive.org/download/${collection}/${files[trackIndex].name}`;
             player.src = url;
-            player.currentTime = savedState.playbackPosition;
+            player.addEventListener('loadedmetadata', () => {
+              player.currentTime = savedState.playbackPosition;
+            }, { once: true });
             document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
             trackList.children[trackIndex].classList.add('active');
           }

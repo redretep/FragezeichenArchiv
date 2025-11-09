@@ -141,6 +141,12 @@
     const savedState = loadState();
     speed = savedState.playbackSpeed;
 
+    function setActiveTrack(index) {
+      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+      trackList.children[index].classList.add('active');
+      trackList.children[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     async function loadTracks() {
       try {
         const res = await fetch(`https://archive.org/metadata/${collection}`);
@@ -170,8 +176,7 @@
             player.addEventListener('loadedmetadata', () => {
               player.currentTime = savedState.playbackPosition;
             }, { once: true });
-            document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
-            trackList.children[trackIndex].classList.add('active');
+            setActiveTrack(trackIndex);
           }
         }
       } catch {
@@ -186,8 +191,7 @@
       const url = `https://archive.org/download/${collection}/${files[i].name}`;
       player.src = url;
       player.play();
-      document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
-      trackList.children[i].classList.add('active');
+      setActiveTrack(i);
       player.oncanplaythrough = () => { loading.style.display = 'none'; };
 
       saveState({ trackIndex: i, playbackPosition: 0 });
@@ -230,19 +234,24 @@
       });
     }
 
-    let lastSaveTime = 0;
-    player.ontimeupdate = () => {
-      const now = Date.now();
-      if (now - lastSaveTime > 5000) {
-        saveState({ playbackPosition: player.currentTime });
-        lastSaveTime = now;
-      }
+    player.onpause = () => {
+      saveState({ playbackPosition: player.currentTime });
+    };
+
+    player.onseeked = () => {
+      saveState({ playbackPosition: player.currentTime });
     };
 
     player.onended = () => {
       saveState({ trackIndex: null, playbackPosition: 0 });
       document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
     };
+
+    window.addEventListener('beforeunload', () => {
+      if (!player.paused) {
+        saveState({ playbackPosition: player.currentTime });
+      }
+    });
 
     player.playbackRate = savedState.playbackSpeed;
     document.querySelector('.speed-btn').textContent = savedState.playbackSpeed + 'x';

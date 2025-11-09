@@ -42,11 +42,18 @@ const collection = 'mein-audio-archiv';
 * `001.png` = Folge 1
 * `002.png` = Folge 2
 * usw.
+* Notiz: funktioniert zum bestehenden Zeitpunkt noch nicht, siehe ToDo
 
 ## Technologien
 
 * **HTML / CSS / JavaScript** (kein Framework notwendig)
 * **Fetch API** für Daten von archive.org
+
+## To-Do
+
+* Cover-Arts über API finden
+* "DiE DR3i"-Folgen hinzufügen
+* Header Farbe fixen
 
 ## Lizenz
 

@@ -9,7 +9,7 @@ Ein moderner Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [
 * **Automatische Playlist:** Alle MP3-Dateien aus einer angegebenen Collection werden geladen.
 * **Eigenes Cover-System:** Es werden lokale Coverbilder verwendet (`001.png`, `002.png`, ...).
 * **Suchfunktion:** Durchsucht Titel.
-* **Sleep-Timer:** Stellt einen Timer ein, um die Wiedergabe automatisch zu stoppen 8gut zum Einschlafen).
+* **Sleep-Timer:** Stellt einen Timer ein, um die Wiedergabe automatisch zu stoppen, gut zum Einschlafen).
 * **Wiedergabegeschwindigkeit:** Passt die Geschwindigkeit an (0.5x bis 2x).
 
 ---

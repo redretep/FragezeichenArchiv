@@ -1,13 +1,13 @@
 # FragezeichenArchiv
 
-Ein moderner Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und in einer GitHub Seite darstellt.
+Ein moderner Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und in einer GitHub Seite darstellt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) genommen.
 
 ---
 
 ## Funktionen
 
-* **Automatische Playlist:** Alle MP3-Dateien aus einer angegebenen Collection werden geladen.
-* **Eigenes Cover-System:** Es werden lokale Coverbilder verwendet (`001.png`, `002.png`, ...).
+* **Automatische Sortierung:** Alle MP3-Dateien aus einer angegebenen Collection werden in der korrekten Reihenfolge geladen.
+* **Cover-System:** Es werden Coverbilder von [dreimetadaten](https://dreimetadaten.de) verwendet.
 * **Suchfunktion:** Durchsucht Titel.
 * **Sleep-Timer:** Stellt einen Timer ein, um die Wiedergabe automatisch zu stoppen, gut zum Einschlafen).
 * **Wiedergabegeschwindigkeit:** Passt die Geschwindigkeit an (0.5x bis 2x).
@@ -23,7 +23,7 @@ Ein moderner Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [
 
 oder
 
-1. Lade die HTML-Datei und die Coverbilder (`001.png`, `002.png`, `003.png`, ...) in denselben Ordner.
+1. Lade die HTML-Datei und die Metadaten in denselben Ordner.
 2. Öffne die Datei im Browser.
 3. Suche und spiele Tracks ab.
 
@@ -37,13 +37,6 @@ In der Variable `collection` im Skript kannst du den Namen der Archive.org-Colle
 const collection = 'mein-audio-archiv';
 ```
 
-## Aufbau der Cover
-
-* `001.png` = Folge 1
-* `002.png` = Folge 2
-* usw.
-* Notiz: funktioniert zum bestehenden Zeitpunkt noch nicht, siehe ToDo
-
 ## Technologien
 
 * **HTML / CSS / JavaScript** (kein Framework notwendig)
@@ -51,9 +44,7 @@ const collection = 'mein-audio-archiv';
 
 ## To-Do
 
-* Cover-Arts über API finden
-* "DiE DR3i"-Folgen hinzufügen
-* Header Farbe fixen
+* "DiE DR3i"-Folgen im Archiv hinzufügen
 
 ## Lizenz
 

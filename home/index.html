@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Drei ??? Player</title>
+  <title>FragezeichenArchiv</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -266,20 +266,17 @@
     <div class="sidebar" id="sidebar">
       <div class="logo">
         <svg fill="white" width="30" height="30" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
-        <span>Fragezeichen</span>
+        <span>???Archiv</span>
       </div>
       
       <div class="archive-input-area">
         <label class="input-label">ARCHIV WECHSELN</label>
         <select id="presetSelector" class="styled-input" onchange="handlePresetChange()">
           <option value="dreifragezeichen">Die Drei ???</option>
-          <option value="harrypotterhoerbuecher">Harry Potter</option>
-          <option value="tkkghoerspiele">TKKG</option>
-          <option value="tributevonpanemhoerbuecher">Tribute von Panem</option>
-          <option value="disneyhoerspiele">Disney</option>
+          <option value="diedr3i">Die DR3i</option>
         </select>
         <input type="text" id="archiveIdInput" class="styled-input" placeholder="Custom ID" value="dreifragezeichen">
-        <button onclick="loadCollection(); toggleSidebar()" class="styled-btn">Bibliothek Laden</button>
+        <button onclick="loadCollection(); toggleSidebar()" class="styled-btn">Eigenes Archiv Laden</button>
       </div>
     </div>
 

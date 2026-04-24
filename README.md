@@ -1,5 +1,5 @@
 # FragezeichenArchiv ⚪🔴🟣
-
+![image](https://github.com/redretep/FragezeichenArchiv/blob/main/homepage.png?raw=true)
 Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und ohne Werbung, Registrierung oder Kosten darstellt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) genommen.
 
 ---
@@ -41,7 +41,11 @@ oder
 ## To-Do
 
 * "DiE DR3i"-Folgen im Archiv hinzufügen
-* Alle Folgen hinzufüge
+* Alle Folgen hinzufügen (durch hochladen auf archive.org, könnte noch daueren)
+
+## Tipp
+
+wenn du DDF Folgen herunterladen willst als .mp3 oder .flac versuche es mal auf [arcord](https://arcord.xyz), dort gibt es die kostenlos als download.
 
 ## Lizenz
 

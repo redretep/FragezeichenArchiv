@@ -1,16 +1,23 @@
 # FragezeichenArchiv
 
-Ein moderner Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und in einer GitHub Seite darstellt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) genommen.
+Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und ohne Werbung, Registrierung oder Kosten darstellt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) genommen.
 
 ---
 
 ## Funktionen
 
-* **Automatische Sortierung:** Alle MP3-Dateien aus einer angegebenen Collection werden in der korrekten Reihenfolge geladen.
-* **Cover-System:** Es werden Coverbilder von [dreimetadaten](https://dreimetadaten.de) verwendet.
-* **Suchfunktion:** Durchsucht Titel.
-* **Sleep-Timer:** Stellt einen Timer ein, um die Wiedergabe automatisch zu stoppen, gut zum Einschlafen).
-* **Wiedergabegeschwindigkeit:** Passt die Geschwindigkeit an (0.5x bis 2x).
+* **Automatische Sortierung:** Alle Folgen aus einer angegebenen Archiv werden in der korrekten Reihenfolge geladen.
+* **Cover-System:** Es werden die Original Coverbilder von [dreimetadaten](https://dreimetadaten.de) verwendet.
+* **Suchfunktion:** Man kann aus dem breiten Katalog alle verfügbaren Folgen suchen.
+* **Sleep-Timer:** Ein Timer, um die Wiedergabe nach einer bestimmten Zeit automatisch zu stoppen (gut zum Einschlafen).
+* **Wiedergabegeschwindigkeit:** Geschwindigkeitsanpassung (0.5x bis 2x).
+* **Cleanes UI** Animationen, Glassmorphism und rounded corners.
+* **Favoriten** Einzelne Folgen können geliked werden um sie später nochmal zu Hören.
+* **Speicherung** Merkt sich automatisch die letzte Abspielposition pro Folge
+* **Gapless Playback** Keine Pause zwischen Tracks durch Vorladen des nächsten Tracks
+* **Anpassbare Quellen** Durch eigenes Auswählen eines Archivs können neue Folgen hinzugefügt werden
+* **Media Session API** Steuerung der Wiedergabe über das Betriebssystem oder Sperrbildschirm-Widgets.
+* ****
 
 ---
 
@@ -29,13 +36,6 @@ oder
 
 ---
 
-## Anpassung
-
-In der Variable `collection` im Skript kannst du den Namen der Archive.org-Collection anpassen, z.B.:
-
-```js
-const collection = 'mein-audio-archiv';
-```
 
 ## Technologien
 

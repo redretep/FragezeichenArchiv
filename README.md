@@ -1,4 +1,4 @@
-# FragezeichenArchiv
+# FragezeichenArchiv ⚪🔴🟣
 
 Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und ohne Werbung, Registrierung oder Kosten darstellt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) genommen.
 
@@ -19,23 +19,19 @@ Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.o
 * **Media Session API** Steuerung der Wiedergabe über das Betriebssystem oder Sperrbildschirm-Widgets.
 * ****
 
----
-
 ## Benutzung
 
-1. öffne [das FragezeichenArchiv](https://redretep.github.io/FragezeichenArchiv) im Browser
-2. Such nach deiner Folge
-3. Stelle einen Sleeptimer ein (optional)
+1. öffne das [???Archiv](https://redretep.github.io/FragezeichenArchiv) im Browser
+2. Such nach deiner Lieblingsfolge und spiele sie ab
 4. Fertig!
 
 oder
 
 1. Lade die HTML-Datei und die Metadaten in denselben Ordner.
 2. Öffne die Datei im Browser.
-3. Suche und spiele Tracks ab.
+3. Suche und spiele Folgen ab.
 
 ---
-
 
 ## Technologien
 
@@ -45,6 +41,7 @@ oder
 ## To-Do
 
 * "DiE DR3i"-Folgen im Archiv hinzufügen
+* Alle Folgen hinzufüge
 
 ## Lizenz
 

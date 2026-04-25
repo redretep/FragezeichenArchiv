@@ -114,6 +114,39 @@
       .modal-header-hero { flex-direction: column; align-items: center; text-align: center; padding: 32px 16px; }
       .modal-cover { width: 160px; height: 160px; }
     }
+
+    /* ── Mobile bottom nav ── */
+    .mobile-nav { display: none; position: fixed; bottom: var(--player); left: 0; right: 0; background: var(--bg-dark); border-top: 1px solid #222; z-index: 1100; padding: 8px 0 env(safe-area-inset-bottom); }
+    .mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; }
+    .mob-nav-btn { background: none; border: none; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 4px 16px; transition: color 0.2s; }
+    .mob-nav-btn.active { color: var(--green); }
+    @media(max-width:800px) { .mobile-nav { display: block; } .content { padding-bottom: 56px; } }
+
+    /* ── Sleep timer UI ── */
+    .sleep-btn { background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; transition: color 0.2s; white-space: nowrap; }
+    .sleep-btn.active { color: var(--green); }
+    .sleep-modal { position: fixed; bottom: calc(var(--player) + 8px); right: 24px; background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 20px; z-index: 1500; min-width: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); display: none; }
+    .sleep-modal.show { display: block; }
+    .sleep-modal-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 12px; }
+    .sleep-options { display: flex; flex-direction: column; gap: 6px; }
+    .sleep-opt { background: none; border: none; color: #fff; cursor: pointer; text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: background 0.2s; }
+    .sleep-opt:hover { background: rgba(255,255,255,0.07); }
+    .sleep-opt.active { background: rgba(29,185,84,0.15); color: var(--green); }
+    .sleep-countdown { font-size: 11px; color: var(--green); margin-top: 8px; text-align: center; font-weight: 700; letter-spacing: 0.5px; min-height: 18px; }
+    .sleep-custom-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; border-top: 1px solid #2a2a2a; padding-top: 10px; }
+    .sleep-custom-input { width: 64px; padding: 8px 10px; background: #222; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 14px; font-weight: 700; outline: none; text-align: center; margin-bottom: 0; }
+    .sleep-custom-input:focus { border-color: var(--green); }
+    .sleep-custom-btn { flex: 1; background: var(--green); color: #000; border: none; border-radius: 8px; padding: 8px 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: filter 0.2s; }
+    .sleep-custom-btn:hover { filter: brightness(1.1); }
+    @media(max-width:800px) { .sleep-modal { right: 8px; left: 8px; bottom: calc(var(--player) + 60px); } }
+
+    /* ── Buffering / loading spinner ── */
+    .buf-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; gap: 20px; backdrop-filter: blur(8px); }
+    .buf-overlay.show { display: flex; }
+    .buf-spinner { width: 64px; height: 64px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--green); border-radius: 50%; animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .buf-label { font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; }
+    .buf-title { font-size: 16px; font-weight: 700; color: #fff; max-width: 280px; text-align: center; line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -176,10 +209,58 @@
     </div>
   </div>
 
-  <div style="width:30%; display:flex; justify-content:flex-end; gap: 20px;">
+  <div style="width:30%; display:flex; justify-content:flex-end; gap: 20px; align-items:center;">
     <button style="background:none; border:none; color:var(--muted); cursor:pointer; font-weight:700;" id="speedBtn" onclick="toggleSpeed()">1x</button>
+    <button class="sleep-btn" id="sleepBtn" onclick="toggleSleepModal()" title="Sleep Timer">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+      <span id="sleepBtnLabel">Timer</span>
+    </button>
     <button style="background:none; border:none; color:var(--muted); cursor:pointer;" onclick="nextTrack(true)"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
   </div>
+
+  <!-- Sleep Timer Panel -->
+  <div class="sleep-modal" id="sleepModal">
+    <div class="sleep-modal-title">Sleep Timer</div>
+    <div class="sleep-options">
+      <button class="sleep-opt" onclick="setSleepTimer(5)">5 Minuten</button>
+      <button class="sleep-opt" onclick="setSleepTimer(15)">15 Minuten</button>
+      <button class="sleep-opt" onclick="setSleepTimer(30)">30 Minuten</button>
+      <button class="sleep-opt" onclick="setSleepTimer(45)">45 Minuten</button>
+      <button class="sleep-opt" onclick="setSleepTimer(60)">60 Minuten</button>
+      <button class="sleep-opt" onclick="setSleepTimer(90)">90 Minuten</button>
+      <div class="sleep-custom-row">
+        <input class="sleep-custom-input" id="sleepCustomInput" type="number" min="1" max="480" placeholder="Min" title="Eigene Minuten">
+        <button class="sleep-custom-btn" onclick="setCustomSleepTimer()">Setzen</button>
+      </div>
+      <button class="sleep-opt" id="sleepOffOpt" onclick="setSleepTimer(0)" style="color:var(--muted)">Aus</button>
+    </div>
+    <div class="sleep-countdown" id="sleepCountdown"></div>
+  </div>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mob-nav-btn active" id="mobNavAll" onclick="showSectionMobile('all', this)">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Start
+    </button>
+    <button class="mob-nav-btn" id="mobNavFavs" onclick="showSectionMobile('favs', this)">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Favoriten
+    </button>
+    <button class="mob-nav-btn" onclick="openDetailView()">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+      Jetzt
+    </button>
+  </div>
+</div>
+
+<!-- Buffering overlay -->
+<div class="buf-overlay" id="bufOverlay">
+  <div class="buf-spinner"></div>
+  <div id="bufTitle" class="buf-title"></div>
+  <div class="buf-label">Wird geladen von archive.org…</div>
 </div>
 
 <audio id="audioA"></audio>
@@ -209,7 +290,7 @@
 
   async function init() {
     try {
-      const res = await fetch('metadata.json');
+      const res = await fetch('https://redretep.github.io/FragezeichenArchiv/metadata.json');
       if(res.ok) metaDB = await res.json();
     } catch(e) {}
     loadArchives();
@@ -433,13 +514,38 @@
     const track = c.tracks[ti];
     
     const player = activePlayer === 'A' ? playerA : playerB;
+
+    // Show buffering spinner
+    showBuffering(track.title || c.title);
+
     player.src = track.url;
     player.playbackRate = speed;
-    player.currentTime = seekTo || (ti === 0 ? (progress[c.id] || 0) : 0);
-    player.play();
-    
+
+    const onReady = () => {
+      player.currentTime = seekTo || (ti === 0 ? (progress[c.id] || 0) : 0);
+      player.play().catch(() => {});
+      hideBuffering();
+      player.removeEventListener('canplay', onReady);
+      player.removeEventListener('error', onError);
+    };
+    const onError = () => {
+      hideBuffering();
+      player.removeEventListener('canplay', onReady);
+      player.removeEventListener('error', onError);
+    };
+    player.addEventListener('canplay', onReady);
+    player.addEventListener('error', onError);
+
     updateUI();
     preloadNext();
+  }
+
+  function showBuffering(title) {
+    document.getElementById('bufTitle').textContent = title || '';
+    document.getElementById('bufOverlay').classList.add('show');
+  }
+  function hideBuffering() {
+    document.getElementById('bufOverlay').classList.remove('show');
   }
 
   function preloadNext() {
@@ -554,6 +660,95 @@
   }
 
   function filterGrid() { renderGrid(); }
+
+  // ── Mobile nav helper ──
+  function showSectionMobile(type, el) {
+    document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    // also sync sidebar nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const sideItems = document.querySelectorAll('.nav-item');
+    if (type === 'all') sideItems[0]?.classList.add('active');
+    else sideItems[1]?.classList.add('active');
+    document.getElementById('sectionTitle').textContent = type === 'favs' ? 'Favoriten' : 'Alle Folgen';
+    renderGrid(type);
+  }
+
+  // ── Sleep timer ──
+  let sleepTimerEnd = null;
+  let sleepTimerInterval = null;
+  let sleepModalOpen = false;
+
+  function toggleSleepModal() {
+    sleepModalOpen = !sleepModalOpen;
+    document.getElementById('sleepModal').classList.toggle('show', sleepModalOpen);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (sleepModalOpen && !e.target.closest('#sleepModal') && !e.target.closest('#sleepBtn')) {
+      sleepModalOpen = false;
+      document.getElementById('sleepModal').classList.remove('show');
+    }
+  });
+
+  function setCustomSleepTimer() {
+    const val = parseInt(document.getElementById('sleepCustomInput').value);
+    if (!val || val < 1) return;
+    document.getElementById('sleepCustomInput').value = '';
+    // deselect preset buttons before setting
+    document.querySelectorAll('.sleep-opt').forEach(b => b.classList.remove('active'));
+    setSleepTimerMinutes(val);
+  }
+
+  function setSleepTimer(minutes) {
+    if (minutes === 0) {
+      clearInterval(sleepTimerInterval);
+      sleepTimerEnd = null;
+      document.querySelectorAll('.sleep-opt').forEach(b => b.classList.remove('active'));
+      document.getElementById('sleepBtn').classList.remove('active');
+      document.getElementById('sleepBtnLabel').textContent = 'Timer';
+      document.getElementById('sleepCountdown').textContent = '';
+      sleepModalOpen = false;
+      document.getElementById('sleepModal').classList.remove('show');
+      return;
+    }
+    document.querySelectorAll('.sleep-opt').forEach(b => b.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    setSleepTimerMinutes(minutes);
+  }
+
+  function setSleepTimerMinutes(minutes) {
+    clearInterval(sleepTimerInterval);
+    sleepTimerEnd = Date.now() + minutes * 60 * 1000;
+    document.getElementById('sleepBtn').classList.add('active');
+
+    function tick() {
+      const remaining = sleepTimerEnd - Date.now();
+      if (remaining <= 0) {
+        clearInterval(sleepTimerInterval);
+        const p = activePlayer === 'A' ? playerA : playerB;
+        p.pause();
+        playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        document.getElementById('sleepBtn').classList.remove('active');
+        document.getElementById('sleepBtnLabel').textContent = 'Timer';
+        document.getElementById('sleepCountdown').textContent = 'Gute Nacht! 🌙';
+        sleepTimerEnd = null;
+        setTimeout(() => {
+          document.getElementById('sleepCountdown').textContent = '';
+          document.getElementById('sleepModal').classList.remove('show');
+          sleepModalOpen = false;
+        }, 3000);
+        return;
+      }
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      const label = `${m}:${s.toString().padStart(2,'0')}`;
+      document.getElementById('sleepBtnLabel').textContent = label;
+      document.getElementById('sleepCountdown').textContent = `Stoppt in ${label}`;
+    }
+    tick();
+    sleepTimerInterval = setInterval(tick, 1000);
+  }
 
   window.onload = init;
 </script>

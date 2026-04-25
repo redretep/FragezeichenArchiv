@@ -106,7 +106,11 @@
 
     @media(max-width:800px) {
       .sidebar { display: none; }
-      .grid { grid-template-columns: repeat(2, 1fr); gap:12px; padding: 12px; }
+      .content { padding: 12px; overflow-x: hidden; }
+      .grid { grid-template-columns: repeat(2, 1fr); gap:8px; padding: 8px; width: 100%; }
+      .card { padding: 10px; min-width: 0; }
+      .card-title { font-size: 13px; }
+      .card-desc { font-size: 11px; }
       .player { padding: 0 16px; }
       .now-playing { width: 70%; }
       .controls { width: 30%; }

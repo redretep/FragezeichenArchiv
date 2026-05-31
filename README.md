@@ -45,7 +45,7 @@ oder
 
 ## Tipp
 
-wenn du DDF Folgen herunterladen willst als .mp3 oder .flac versuche es mal auf [arcord](https://arcord.xyz), dort gibt es die kostenlos als download.
+wenn du DDF Folgen herunterladen willst als .mp3 oder .flac versuche es mal auf [arcod](https://arcod.xyz), dort gibt es alle kostenlos als download.
 
 ## Lizenz
 

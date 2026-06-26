@@ -367,6 +367,11 @@
       border: 1px solid rgba(255,255,255,0.02);
     }
 
+    .track-download-btn:hover {
+      color: var(--primary) !important;
+      transform: translateY(1px);
+    }
+
     .fav-btn {
       position: absolute;
       top: 8px;
@@ -2021,6 +2026,10 @@
           <span class="modal-ep-num">${epLabel}</span>
           <h2 class="modal-title">${c.title}</h2>
           <p class="modal-author">${c.author}</p>
+          <button class="btn-action" onclick="downloadEpisode(${ci})" style="margin-top: 12px; padding: 8px 16px; font-size: 13px; align-self: flex-start; display: flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Folge herunterladen</span>
+          </button>
         </div>
       </div>
       <div class="modal-content-body">
@@ -2036,7 +2045,12 @@
                     <span class="track-index">${i+1}</span>
                     <span class="track-title">${t.title} ${sourceBadge}</span>
                   </div>
-                  <svg class="track-play-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="track-download-btn" onclick="event.stopPropagation(); downloadTrack('${t.url}', '${t.name || t.title}')" title="Track herunterladen" style="background:none; border:none; color: var(--muted); cursor:pointer; padding: 4px; display:flex; align-items:center; justify-content:center; transition: var(--transition);">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </button>
+                    <svg class="track-play-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </div>
                 </div>
               `;
             }).join('')}
@@ -2081,6 +2095,10 @@
           <h2 class="modal-title">${c.title}</h2>
           <p class="modal-author">${c.author}</p>
           ${m?.veröffentlichungsdatum ? `<p style="color: var(--muted); font-size: 13px; margin-top: 6px;">Erschienen am: ${new Date(m.veröffentlichungsdatum).toLocaleDateString('de-DE')}</p>` : ''}
+          <button class="btn-action" onclick="downloadEpisode(${currentCollectionIdx})" style="margin-top: 12px; padding: 8px 16px; font-size: 13px; align-self: flex-start; display: flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Folge herunterladen</span>
+          </button>
         </div>
       </div>
       <div class="modal-content-body">
@@ -2098,7 +2116,12 @@
                   <span class="track-index">${i+1}</span>
                   <span class="track-title">${t.title}</span>
                 </div>
-                <svg class="track-play-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button class="track-download-btn" onclick="event.stopPropagation(); downloadTrack('${t.url}', '${t.name || t.title}')" title="Track herunterladen" style="background:none; border:none; color: var(--muted); cursor:pointer; padding: 4px; display:flex; align-items:center; justify-content:center; transition: var(--transition);">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  </button>
+                  <svg class="track-play-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
               </div>
             `).join('')}
           </div>
@@ -2340,8 +2363,21 @@
         document.getElementById('d_totalTime').textContent = totalFormatted;
         
         if (currentCollectionIdx !== -1) {
-          progress[collections[currentCollectionIdx].id] = p.currentTime;
+          const c = collections[currentCollectionIdx];
+          const t = c.tracks[currentTrackIdx];
+          progress[c.id] = p.currentTime;
           localStorage.setItem('???_progress', JSON.stringify(progress));
+          
+          // Throttled history save (once per second)
+          const now = Date.now();
+          if (!window._lastHistWrite || now - window._lastHistWrite > 1000) {
+            const histItem = listeningHistory.find(h => h.collectionId === c.id && h.trackName === t.name);
+            if (histItem) {
+              histItem.position = p.currentTime;
+              localStorage.setItem('???_history', JSON.stringify(listeningHistory));
+            }
+            window._lastHistWrite = now;
+          }
         }
       }
     };
@@ -2351,6 +2387,22 @@
 
     playerA.onended = () => nextTrack();
     playerB.onended = () => nextTrack();
+    
+    // Save position immediately on pause
+    const saveProgressOnPause = () => {
+      if (currentCollectionIdx !== -1) {
+        const p = activePlayer === 'A' ? playerA : playerB;
+        const c = collections[currentCollectionIdx];
+        const t = c.tracks[currentTrackIdx];
+        const histItem = listeningHistory.find(h => h.collectionId === c.id && h.trackName === t.name);
+        if (histItem) {
+          histItem.position = p.currentTime;
+          localStorage.setItem('???_history', JSON.stringify(listeningHistory));
+        }
+      }
+    };
+    playerA.addEventListener('pause', saveProgressOnPause);
+    playerB.addEventListener('pause', saveProgressOnPause);
 
     // Timeline Drag / Tap
     const configureSeek = (barId) => {
@@ -2544,6 +2596,17 @@
           </div>
         </div>
 
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <h3 style="font-size: 18px; font-weight: 700; color: #fff;">GitHub Repository</h3>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0;">
+            Hier findest du den Quellcode und kannst Feedback hinterlassen oder zum Projekt beitragen:
+          </p>
+          <a href="https://github.com/redretep/FragezeichenArchiv" target="_blank" class="btn-action" style="display: flex; align-items: center; justify-content: center; text-decoration: none; gap: 8px; font-weight: 600; padding: 12px; margin-top: 4px;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <span>github.com/redretep/FragezeichenArchiv</span>
+          </a>
+        </div>
+
         <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(255,255,255,0.01); border: 1px solid var(--border); border-radius: 20px; padding: 20px; max-width:100%;" class="mobile-settings-block">
           <h4 style="font-size: 14px; font-weight: 700;">Archiv-Quellen</h4>
           <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">Geben Sie Archive.org IDs mit DDF Folgen durch Komma getrennt ein um sie abzuspielen, falls FileDitch nicht funktioniert:</p>
@@ -2669,6 +2732,37 @@
     document.getElementById('sleepPopup').classList.remove('show');
   }
 
+  // --- Download Helpers ---
+  function downloadTrack(url, filename) {
+    if (!url) {
+      alert("Dieses Hörspiel hat keine Audio-Quelle.");
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function downloadEpisode(ci) {
+    const c = collections[ci];
+    const playableTracks = c.tracks.filter(t => t.url);
+    if (playableTracks.length === 0) {
+      alert("Dieses Hörspiel hat keine Audio-Quellen.");
+      return;
+    }
+    if (confirm(`Möchtest du alle ${playableTracks.length} Tracks dieser Folge herunterladen? Ihr Browser öffnet möglicherweise mehrere Downloads.`)) {
+      playableTracks.forEach((t, index) => {
+        setTimeout(() => {
+          downloadTrack(t.url, t.name || t.title);
+        }, index * 800); // Stagger downloads to prevent browser blocking
+      });
+    }
+  }
+
   // --- Listening History Helpers ---
   function addToHistory(ci, ti) {
     if (ci < 0 || ci >= collections.length) return;
@@ -2676,10 +2770,19 @@
     if (ti < 0 || ti >= c.tracks.length) return;
     const t = c.tracks[ti];
 
-    const item = { collectionId: c.id, trackName: t.name, timestamp: Date.now() };
+    // Find existing item to preserve its position progress
+    const existing = listeningHistory.find(h => h.collectionId === c.id && h.trackName === t.name);
+    const savedPosition = existing ? existing.position : 0;
     
     // Remove if it's already in history (so it moves to the top)
     listeningHistory = listeningHistory.filter(h => !(h.collectionId === c.id && h.trackName === t.name));
+    
+    const item = { 
+      collectionId: c.id, 
+      trackName: t.name, 
+      timestamp: Date.now(),
+      position: savedPosition
+    };
     
     // Prepend to top
     listeningHistory.unshift(item);
@@ -2764,13 +2867,16 @@
       const timeAgo = formatTimeAgo(item.timestamp);
       const globalIdx = collections.indexOf(c);
 
+      const position = item.position || 0;
+      const posLabel = position > 0.5 ? ` • Position: ${fmt(position)}` : '';
+
       rowsHTML += `
-        <div class="history-item-row" onclick="playTrack(${globalIdx}, ${trackIdx})">
+        <div class="history-item-row" onclick="playTrack(${globalIdx}, ${trackIdx}, ${position})">
           <div class="history-item-left">
             <img src="${c.cover}" alt="Cover" class="history-item-cover" onerror="this.src='https://placehold.co/128'">
             <div class="history-item-details">
               <span class="history-item-title">${t.title}</span>
-              <span class="history-item-subtitle">${c.title}</span>
+              <span class="history-item-subtitle">${c.title}${posLabel}</span>
             </div>
           </div>
           <div class="history-item-right">

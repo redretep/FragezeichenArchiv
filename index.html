@@ -276,6 +276,27 @@
   </div>
 </div>
 
+<!-- Update Popup Overlay -->
+<div class="overlay-container" id="updateOverlay" onclick="if(event.target===this)closeUpdateModal()">
+  <div class="modal-box" style="max-width: 500px; padding: 40px 24px; text-align: center; border-radius: 20px;">
+    <div style="font-size: 48px; margin-bottom: 20px;">✨</div>
+    <h2 style="font-size: 20px; font-weight: 800; line-height: 1.4; margin-bottom: 16px; color: #fff; text-transform: uppercase;">
+      NEUES UPDATE: HD STREAMING MIT ALLEN FOLGEN UND SPECIALS!
+    </h2>
+    <p style="color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.5;">
+      Nach einiger Zeit sind jetzt erfolgreich alle Hörspiele auf FileDitch gehostet und können in HD gestreamt werden! Außerdem gibt es jetzt einen Hörverlauf, Tracks für jedes Hörspiel und vielen Dank an swiggis fürs Uploaden!!
+    </p>
+    <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%;">
+      <a href="https://redretep.github.io/FragezeichenArchiv/beta" class="btn" style="text-decoration: none; display: block; text-align: center; line-height: 1.2;">
+        Jetzt ausprobieren
+      </a>
+      <button onclick="closeUpdateModal()" style="background: none; border: none; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 0; transition: color .2s;">
+        Später :/
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   let metaDB = {};
   let collections = [];
@@ -293,12 +314,25 @@
   const playIcon = document.getElementById('playIcon');
 
   async function init() {
+    showUpdateModal();
     try {
       const res = await fetch('https://redretep.github.io/FragezeichenArchiv/metadata.json');
       if(res.ok) metaDB = await res.json();
     } catch(e) {}
     loadArchives();
     setupProgress();
+  }
+
+  function showUpdateModal() {
+    const ov = document.getElementById('updateOverlay');
+    ov.style.display = 'flex';
+    setTimeout(() => ov.classList.add('show'), 10);
+  }
+
+  function closeUpdateModal() {
+    const ov = document.getElementById('updateOverlay');
+    ov.classList.remove('show');
+    setTimeout(() => ov.style.display = 'none', 300);
   }
 
   function getNumber(str) {
@@ -580,7 +614,7 @@
     }
   }
 
-  function updateUI() {
+  updateUI = function() {
     const c = collections[currentCollectionIdx];
     const t = c.tracks[currentTrackIdx];
     document.getElementById('npTitle').textContent = c.title;

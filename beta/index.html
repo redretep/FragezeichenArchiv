@@ -1621,7 +1621,7 @@
 
     // 1. Fetch metadata.json from redretep's repository
     try {
-      const res = await fetch('https://dreimetadaten.de/data/Serie.json');
+      const res = await fetch('https://redretep.github.io/FragezeichenArchiv/metadata.json');
       if (res.ok) metaDB = await res.json();
     } catch (e) {
       console.error("Failed to load metadata.json:", e);

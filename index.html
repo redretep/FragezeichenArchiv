@@ -316,7 +316,7 @@
   async function init() {
     showUpdateModal();
     try {
-      const res = await fetch('https://redretep.github.io/FragezeichenArchiv/metadata.json');
+      const res = await fetch('https://dreimetadaten.de/data/Serie.json');
       if(res.ok) metaDB = await res.json();
     } catch(e) {}
     loadArchives();

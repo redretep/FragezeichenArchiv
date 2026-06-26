@@ -299,6 +299,7 @@
       flex-direction: column;
       gap: 12px;
       backdrop-filter: blur(10px);
+      min-width: 0;
     }
 
     .episode-card:hover {
@@ -439,6 +440,7 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      min-width: 0;
     }
 
     .card-title {
@@ -1189,12 +1191,13 @@
       }
 
       .episodes-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
       }
 
       .episode-card {
         padding: 10px;
+        min-width: 0;
       }
 
       .card-title {
@@ -2340,16 +2343,14 @@
           progress[collections[currentCollectionIdx].id] = p.currentTime;
           localStorage.setItem('???_progress', JSON.stringify(progress));
         }
-        
-        // Natural end of track -> auto play next
-        if (p.duration - p.currentTime < 0.8 && !p.paused) {
-          nextTrack();
-        }
       }
     };
     
     playerA.ontimeupdate = update;
     playerB.ontimeupdate = update;
+
+    playerA.onended = () => nextTrack();
+    playerB.onended = () => nextTrack();
 
     // Timeline Drag / Tap
     const configureSeek = (barId) => {

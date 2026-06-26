@@ -27,6 +27,17 @@ def format_size(bytes_size):
 def get_natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
+def get_audio_files(folder_path):
+    audio_files = []
+    for root, dirs, files in os.walk(folder_path):
+        dirs[:] = [d for d in dirs if d != '__MACOSX' and not d.startswith('__')]
+        for f in files:
+            if f.startswith('._'):
+                continue
+            if f.lower().endswith(('.mp3', '.flac', '.m4a')):
+                audio_files.append(os.path.join(root, f))
+    return audio_files
+
 def extract_episode_number(folder_name):
     match = re.search(r'(?:folge|nr|no)?\.?\s*(\d{1,3})(?:\D|$)', folder_name, re.IGNORECASE)
     if match:
@@ -91,10 +102,7 @@ class UploadWorker(threading.Thread):
             folder_path = candidate["path"]
             folder_name = candidate["folder_name"]
             
-            audio_files = []
-            for file_entry in os.scandir(folder_path):
-                if file_entry.is_file() and file_entry.name.lower().endswith((".mp3", ".flac", ".m4a")):
-                    audio_files.append(file_entry.path)
+            audio_files = get_audio_files(folder_path)
             
             if not audio_files:
                 continue
@@ -577,9 +585,7 @@ class FileDitchUploaderGUI:
             # Scan files inside folder to check status
             audio_count = 0
             try:
-                for file_entry in os.scandir(path):
-                    if file_entry.is_file() and file_entry.name.lower().endswith((".mp3", ".flac", ".m4a")):
-                        audio_count += 1
+                audio_count = len(get_audio_files(path))
             except:
                 pass
                 
@@ -625,11 +631,8 @@ class FileDitchUploaderGUI:
         ep_key = candidate["id"]
         
         # Scan Audio Files
-        audio_files = []
         try:
-            for file_entry in os.scandir(folder_path):
-                if file_entry.is_file() and file_entry.name.lower().endswith((".mp3", ".flac", ".m4a")):
-                    audio_files.append(file_entry.path)
+            audio_files = get_audio_files(folder_path)
         except Exception as e:
             self.log(f"Error reading directory {folder_path}: {e}")
             return

@@ -51,9 +51,18 @@ def extract_embedded_cover(filepath):
 def save_cover(c_id, folder_path):
     os.makedirs(COVERS_DIR, exist_ok=True)
     
+    # 0. Check if cover file already exists in COVERS_DIR
+    for ext in ('.jpg', '.png', '.jpeg'):
+        existing_path = os.path.join(COVERS_DIR, f"{c_id}{ext}")
+        if os.path.exists(existing_path):
+            return f"covers/{c_id}{ext}"
+            
     # 1. Search for files like Cover.jpg, folder.png, etc.
-    for root, _, files in os.walk(folder_path):
+    for root, dirs, files in os.walk(folder_path):
+        dirs[:] = [d for d in dirs if d != '__MACOSX' and not d.startswith('__')]
         for f in files:
+            if f.startswith('._'):
+                continue
             if f.lower() in ('cover.jpg', 'cover.png', 'folder.jpg', 'folder.png', 'front.jpg', 'front.png'):
                 ext = os.path.splitext(f)[1].lower()
                 dest_name = f"{c_id}{ext}"
@@ -66,8 +75,11 @@ def save_cover(c_id, folder_path):
                     
     # 2. Extract embedded cover from first audio file
     audio_files = []
-    for root, _, files in os.walk(folder_path):
+    for root, dirs, files in os.walk(folder_path):
+        dirs[:] = [d for d in dirs if d != '__MACOSX' and not d.startswith('__')]
         for f in files:
+            if f.startswith('._'):
+                continue
             if f.lower().endswith(('.mp3', '.flac', '.m4a')):
                 audio_files.append(os.path.join(root, f))
                 
@@ -140,7 +152,7 @@ def build_dr3i_metadata():
             if match:
                 num = int(match.group(1))
             else:
-                num = 99  # e.g., Bonus
+                num = 9  # e.g., Bonus
             folders.append((num, entry.path, entry.name))
             
     # Sort folders naturally
@@ -153,8 +165,11 @@ def build_dr3i_metadata():
         
         # Scan for audio files recursively
         audio_files = []
-        for root, _, files in os.walk(path):
+        for root, dirs, files in os.walk(path):
+            dirs[:] = [d for d in dirs if d != '__MACOSX' and not d.startswith('__')]
             for f in files:
+                if f.startswith('._'):
+                    continue
                 if f.lower().endswith(('.mp3', '.flac', '.m4a')):
                     audio_files.append(os.path.join(root, f))
                     
@@ -230,8 +245,11 @@ def build_specials_metadata():
         
         # Scan for audio files recursively
         audio_files = []
-        for root, _, files in os.walk(path):
+        for root, dirs, files in os.walk(path):
+            dirs[:] = [d for d in dirs if d != '__MACOSX' and not d.startswith('__')]
             for f in files:
+                if f.startswith('._'):
+                    continue
                 if f.lower().endswith(('.mp3', '.flac', '.m4a')):
                     audio_files.append(os.path.join(root, f))
                     

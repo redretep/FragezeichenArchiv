@@ -22,6 +22,18 @@ def format_size(bytes_size):
 def get_natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
+def get_audio_files(folder_path):
+    audio_files = []
+    for root, dirs, files in os.walk(folder_path):
+        dirs[:] = [d for d in dirs if d != '__MACOSX' and not d.startswith('__')]
+        for f in files:
+            if f.startswith('._'):
+                continue
+            if f.lower().endswith(('.mp3', '.flac', '.m4a')):
+                audio_files.append(os.path.join(root, f))
+    return audio_files
+
+
 def extract_episode_number(folder_name):
     # Match patterns like "001", "1", "Folge 184", "Nr. 05"
     match = re.search(r'(?:folge|nr|no)?\.?\s*(\d{1,3})(?:\D|$)', folder_name, re.IGNORECASE)
@@ -217,10 +229,7 @@ def main():
             folder_name = candidate["folder_name"]
             
             # Find all audio files in the folder
-            audio_files = []
-            for file_entry in os.scandir(folder_path):
-                if file_entry.is_file() and file_entry.name.lower().endswith((".mp3", ".flac", ".m4a")):
-                    audio_files.append(file_entry.path)
+            audio_files = get_audio_files(folder_path)
             
             if not audio_files:
                 continue

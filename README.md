@@ -1,14 +1,14 @@
 # FragezeichenArchiv ⚪🔴🟣
-![image](https://github.com/redretep/FragezeichenArchiv/blob/main/homepage.png?raw=true)
-Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.org](https://archive.org) lädt und ohne Werbung, Registrierung oder Kosten darstellt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) genommen.
+![image](https://github.com/redretep/FragezeichenArchiv/blob/main/assets/grafik.png?raw=true)
+Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [FileDitch](https://github.com/fileditch/fileditch.github.io) oder [archive.org](https://archive.org) lädt und ohne Werbung, Registrierung oder Kosten abspielt. Die Metadaten der Folgen werden von [dreimetadaten](https://dreimetadaten.de) geladen.
 
 ---
 
 ## Funktionen
 
-* **Automatische Sortierung:** Alle Folgen aus einer angegebenen Archiv werden in der korrekten Reihenfolge geladen.
+* **Automatische Sortierung:** Alle Folgen in FileDitch und aus den angegebenen Archiven werden in der korrekten Reihenfolge geladen.
 * **Cover-System:** Es werden die Original Coverbilder von [dreimetadaten](https://dreimetadaten.de) verwendet.
-* **Suchfunktion:** Man kann aus dem breiten Katalog alle verfügbaren Folgen suchen.
+* **Suchfunktion:** Man kann alle verfügbaren Folgen suchen.
 * **Sleep-Timer:** Ein Timer, um die Wiedergabe nach einer bestimmten Zeit automatisch zu stoppen (gut zum Einschlafen).
 * **Wiedergabegeschwindigkeit:** Geschwindigkeitsanpassung (0.5x bis 2x).
 * **Cleanes UI** Animationen, Glassmorphism und rounded corners.
@@ -24,13 +24,6 @@ Ein Web-Audioplayer, der automatisch die drei Fragezeichen Folgen von [archive.o
 1. öffne das [???Archiv](https://redretep.github.io/FragezeichenArchiv) im Browser
 2. Such nach deiner Lieblingsfolge und spiele sie ab
 4. Fertig!
-
-oder
-
-1. Lade die HTML-Datei und die Metadaten in denselben Ordner.
-2. Öffne die Datei im Browser.
-3. Suche und spiele Folgen ab.
-
 ---
 
 ## Technologien
@@ -41,7 +34,7 @@ oder
 ## To-Do
 
 * "DiE DR3i"-Folgen im Archiv hinzufügen
-* Alle Folgen hinzufügen (durch hochladen auf archive.org, könnte noch daueren)
+* ~~Alle Folgen hinzufügen (durch hochladen auf archive.org, könnte noch daueren)~~ FileDitch hostet jetzt ALLE HÖRSPIELE 🙏🤩
 
 ## Tipp
 
